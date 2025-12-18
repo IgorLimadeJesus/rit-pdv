@@ -3,6 +3,7 @@ const PERIODS_KEY = "fs_pdv_periods"
 const SALES_KEY = "fs_pdv_sales"
 const PRODUCTS_KEY = "fs_pdv_products"
 const SUPPLIERS_KEY = "fs_pdv_suppliers"
+const ACCESSES_KEY = "fs_pdv_accesses"
 
 export function loadPeriods() {
   try {
@@ -64,4 +65,18 @@ export function loadSuppliers() {
 
 export function saveSuppliers(suppliers) {
   localStorage.setItem(SUPPLIERS_KEY, JSON.stringify(suppliers))
+}
+
+// Accesses helpers
+export function loadAccesses() {
+  try {
+    const raw = localStorage.getItem(ACCESSES_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+export function saveAccesses(accesses) {
+  localStorage.setItem(ACCESSES_KEY, JSON.stringify(accesses))
 }

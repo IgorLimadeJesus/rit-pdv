@@ -4,6 +4,7 @@ import NotFound from "../pages/NotFound"
 import Dashboard from "../pages/Dashboard"
 import PDV from "../pages/PDV"
 import Products from "../pages/Products"
+import Settings from "../pages/Settings"
 
 export default function AppRoutes() {
   return (
@@ -12,6 +13,7 @@ export default function AppRoutes() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/pdv" element={<PDV />} />
       <Route path="/produtos" element={<Products />} />
+      <Route path="/configuracoes" element={<Settings />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

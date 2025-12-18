@@ -3,7 +3,12 @@ import { usePeriod } from "../context/PeriodContext"
 import { useInventory } from "../context/InventoryContext"
 import { formatCurrencyBRL } from "../utils/storage"
 import { PlusCircle, Trash2, CheckCircle2, Minus, Plus, Search, Tag } from "lucide-react"
+
 import { useState } from "react"
+import FinalizeSaleModal from "../components/FinalizeSaleModal"
+import ConfirmModal from "../components/ConfirmModal"
+import LoadingModal from "../components/LoadingModal"
+import PixModal from "../components/PixModal"
 
 export default function PDV() {
   const { addSale, currentOpen, currentCashbox } = usePeriod()
@@ -13,6 +18,13 @@ export default function PDV() {
   const [query, setQuery] = useState("")
   const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)))
   const [activeCat, setActiveCat] = useState("Todos")
+
+  // Modals state
+  const [showFinalize, setShowFinalize] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [showLoading, setShowLoading] = useState(false)
+  const [showPix, setShowPix] = useState(false)
+  const [selectedPayment, setSelectedPayment] = useState(null)
 
   const subtotal = items.reduce((sum, it) => sum + (Number(it.price) * Number(it.qty)), 0)
 
@@ -40,14 +52,50 @@ export default function PDV() {
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, qty: Math.max(1, Number(it.qty) - 1) } : it))
   }
 
-  const checkout = async () => {
+
+  // Ao clicar em finalizar venda, abre modal de finalização
+  const handleClickFinalize = () => {
     if (!currentOpen || !currentCashbox || items.length === 0) return
-    const res = addSale({ amount: subtotal, items })
-    if (res?.ok) {
+    setShowFinalize(true)
+  }
+
+  // Quando escolher forma de pagamento
+  const handleSelectPayment = (method) => {
+    setSelectedPayment(method)
+    setShowFinalize(false)
+    if (method === 'pix') {
+      setShowPix(true)
+    } else {
+      setShowConfirm(true)
+    }
+  }
+
+  // Confirmação final (exceto Pix)
+  const handleConfirm = async () => {
+    setShowConfirm(false)
+    setShowLoading(true)
+    setTimeout(() => {
+      // Persist sale
+      addSale({ amount: subtotal, items })
+      setShowLoading(false)
       setItems([])
       setMessage("Venda registrada com sucesso")
       setTimeout(() => setMessage(""), 2000)
-    }
+    }, 1200)
+  }
+
+  // Simular pagamento Pix
+  const handleSimulatePix = () => {
+    setShowPix(false)
+    setShowLoading(true)
+    setTimeout(() => {
+      // Persist sale
+      addSale({ amount: subtotal, items })
+      setShowLoading(false)
+      setItems([])
+      setMessage("Pagamento Pix confirmado e venda registrada!")
+      setTimeout(() => setMessage(""), 2000)
+    }, 1500)
   }
 
   return (
@@ -144,7 +192,7 @@ export default function PDV() {
               </div>
               <div className="mt-3">
                 <button
-                  onClick={checkout}
+                  onClick={handleClickFinalize}
                   disabled={!currentOpen || !currentCashbox || items.length === 0}
                   className="w-full px-4 py-3 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
                 >
@@ -158,6 +206,34 @@ export default function PDV() {
           </div>
         </div>
       </main>
+
+      {/* Modals */}
+      <FinalizeSaleModal
+        isOpen={showFinalize}
+        onClose={() => setShowFinalize(false)}
+        items={items}
+        total={subtotal}
+        onSelectPayment={handleSelectPayment}
+      />
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleConfirm}
+        title="Confirmar venda"
+        description={`Deseja realmente registrar a venda no valor de R$ ${subtotal.toFixed(2)}?`}
+        confirmText="Confirmar"
+        cancelText="Cancelar"
+      />
+      <LoadingModal
+        isOpen={showLoading}
+        message={selectedPayment === 'pix' ? 'Aguardando confirmação do Pix...' : 'Registrando venda...'}
+      />
+      <PixModal
+        isOpen={showPix}
+        onClose={() => setShowPix(false)}
+        pixKey="pix-chave-teste@banco.com"
+        onSimulate={handleSimulatePix}
+      />
     </div>
   )
 }

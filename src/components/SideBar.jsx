@@ -31,8 +31,9 @@ export default function SideBar() {
 						<NavLink
 							to="/dashboard"
 							className={({ isActive }) =>
-								`${baseClass} ${isActive ? "bg-indigo-600 text-white" : "text-gray-100 hover:bg-gray-700"}`
+								`${baseClass} ${isActive ? "text-white" : "text-gray-100 hover:bg-gray-700"}`
 							}
+							style={({ isActive }) => (isActive ? { backgroundColor: "var(--primary-color)" } : undefined)}
 						>
 							<BarChart3 className="w-5 h-5" />
 							<span>Métricas</span>
@@ -44,8 +45,9 @@ export default function SideBar() {
 						<NavLink
 							to="/pdv"
 							className={({ isActive }) =>
-								`${baseClass} ${isActive ? "bg-indigo-600 text-white" : "text-gray-100 hover:bg-gray-700"}`
+								`${baseClass} ${isActive ? "text-white" : "text-gray-100 hover:bg-gray-700"}`
 							}
+							style={({ isActive }) => (isActive ? { backgroundColor: "var(--primary-color)" } : undefined)}
 						>
 							<ShoppingCart className="w-5 h-5" />
 							<span>PDV</span>
@@ -56,8 +58,9 @@ export default function SideBar() {
 						<NavLink
 							to="/produtos"
 							className={({ isActive }) =>
-								`${baseClass} ${isActive ? "bg-indigo-600 text-white" : "text-gray-100 hover:bg-gray-700"}`
+								`${baseClass} ${isActive ? "text-white" : "text-gray-100 hover:bg-gray-700"}`
 							}
+							style={({ isActive }) => (isActive ? { backgroundColor: "var(--primary-color)" } : undefined)}
 						>
 							<Box className="w-5 h-5" />
 							<span>Produtos</span>
@@ -68,8 +71,9 @@ export default function SideBar() {
 						<NavLink
 							to="/configuracoes"
 							className={({ isActive }) =>
-								`${baseClass} ${isActive ? "bg-indigo-600 text-white" : "text-gray-100 hover:bg-gray-700"}`
+								`${baseClass} ${isActive ? "text-white" : "text-gray-100 hover:bg-gray-700"}`
 							}
+							style={({ isActive }) => (isActive ? { backgroundColor: "var(--primary-color)" } : undefined)}
 						>
 							<Settings className="w-5 h-5" />
 							<span>Configurações</span>
