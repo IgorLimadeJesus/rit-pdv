@@ -2,7 +2,7 @@ import SideBar from "../components/SideBar"
 import { useState } from "react"
 import { useInventory } from "../context/InventoryContext"
 import { formatCurrencyBRL } from "../utils/storage"
-import { Plus, Package, Truck, Trash2, X } from "lucide-react"
+import { Plus, Package, Truck, Trash2, X, User, Phone } from "lucide-react"
 
 export default function Products() {
   const { products, suppliers, addProduct, removeProduct, addSupplier, removeSupplier } = useInventory()
@@ -11,6 +11,14 @@ export default function Products() {
   const [showSupModal, setShowSupModal] = useState(false)
   const [prodForm, setProdForm] = useState({ name: "", category: "", price: "", image: "" })
   const [supForm, setSupForm] = useState({ name: "", contact: "" })
+
+  const formatPhoneBR = (value) => {
+    const digits = (value || "").replace(/\D/g, "").slice(0, 11)
+    if (digits.length <= 2) return digits ? `(${digits}` : ""
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}`
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6, 10)}`
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`
+  }
 
   const submitProduct = () => {
     const price = Number(prodForm.price)
@@ -34,15 +42,15 @@ export default function Products() {
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">Produtos</h1>
 
         <div className="mt-4 flex items-center gap-2">
-          <button onClick={() => setTab("produtos")} className={`px-4 py-2 rounded-md text-sm ${tab === "produtos" ? "bg-indigo-600 text-white" : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700"}`}>Produtos</button>
-          <button onClick={() => setTab("fornecedores")} className={`px-4 py-2 rounded-md text-sm ${tab === "fornecedores" ? "bg-indigo-600 text-white" : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700"}`}>Fornecedores</button>
+          <button onClick={() => setTab("produtos")} className={`px-4 py-2 rounded-md text-sm ${tab === "produtos" ? "text-white" : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700"}`} style={tab === "produtos" ? { backgroundColor: "var(--primary-color)" } : undefined}>Produtos</button>
+          <button onClick={() => setTab("fornecedores")} className={`px-4 py-2 rounded-md text-sm ${tab === "fornecedores" ? "text-white" : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700"}`} style={tab === "fornecedores" ? { backgroundColor: "var(--primary-color)" } : undefined}>Fornecedores</button>
         </div>
 
         {tab === "produtos" ? (
           <section className="mt-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-2"><Package className="w-4 h-4" /> Lista de produtos</h2>
-              <button onClick={() => setShowProdModal(true)} className="px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 flex items-center gap-2">
+              <button onClick={() => setShowProdModal(true)} className="px-3 py-2 rounded-md text-white flex items-center gap-2" style={{ backgroundColor: "var(--primary-color)" }}>
                 <Plus className="w-4 h-4" /> Cadastrar produto
               </button>
             </div>
@@ -92,7 +100,7 @@ export default function Products() {
           <section className="mt-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-2"><Truck className="w-4 h-4" /> Lista de fornecedores</h2>
-              <button onClick={() => setShowSupModal(true)} className="px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 flex items-center gap-2">
+              <button onClick={() => setShowSupModal(true)} className="px-3 py-2 rounded-md text-white flex items-center gap-2" style={{ backgroundColor: "var(--primary-color)" }}>
                 <Plus className="w-4 h-4" /> Adicionar fornecedor
               </button>
             </div>
@@ -145,7 +153,7 @@ export default function Products() {
               </div>
               <div className="mt-4 flex justify-end gap-2">
                 <button onClick={()=>setShowProdModal(false)} className="px-3 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100">Cancelar</button>
-                <button onClick={submitProduct} className="px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Salvar</button>
+                <button onClick={submitProduct} className="px-3 py-2 rounded-md text-white" style={{ backgroundColor: "var(--primary-color)" }}>Salvar</button>
               </div>
             </div>
           </div>
@@ -159,12 +167,18 @@ export default function Products() {
                 <button onClick={() => setShowSupModal(false)} className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"><X className="w-4 h-4" /></button>
               </div>
               <div className="mt-3 space-y-3">
-                <input value={supForm.name} onChange={e=>setSupForm(f=>({...f,name:e.target.value}))} placeholder="Nome" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
-                <input value={supForm.contact} onChange={e=>setSupForm(f=>({...f,contact:e.target.value}))} placeholder="Contato" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                <div className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <input value={supForm.name} onChange={e=>setSupForm(f=>({...f,name:e.target.value}))} placeholder="Nome do fornecedor" className="flex-1 bg-transparent outline-none" />
+                </div>
+                <div className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-gray-500" />
+                  <input value={supForm.contact} onChange={e=>setSupForm(f=>({...f,contact: formatPhoneBR(e.target.value)}))} placeholder="Telefone" type="tel" className="flex-1 bg-transparent outline-none" />
+                </div>
               </div>
               <div className="mt-4 flex justify-end gap-2">
                 <button onClick={()=>setShowSupModal(false)} className="px-3 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100">Cancelar</button>
-                <button onClick={submitSupplier} className="px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Salvar</button>
+                <button onClick={submitSupplier} className="px-3 py-2 rounded-md text-white" style={{ backgroundColor: "var(--primary-color)" }}>Salvar</button>
               </div>
             </div>
           </div>

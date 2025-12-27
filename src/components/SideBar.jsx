@@ -1,11 +1,13 @@
 import { useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import { ShoppingCart, Box, BarChart3, Settings, LogOut } from "lucide-react"
+import { clearAuthToken, clearAuthUser, loadAuthUser } from "../utils/storage"
 
 export default function SideBar() {
 	const [showConfirm, setShowConfirm] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
 	const navigate = useNavigate()
+	const [user] = useState(() => loadAuthUser())
 
 	const baseClass = "flex items-center gap-3 px-3 py-2 rounded-md transition-colors"
 
@@ -14,7 +16,9 @@ export default function SideBar() {
 	const confirmLogout = async () => {
 		setShowConfirm(false)
 		setIsLoading(true)
-		await new Promise((r) => setTimeout(r, 1200))
+		clearAuthToken()
+		clearAuthUser()
+		await new Promise((r) => setTimeout(r, 500))
 		setIsLoading(false)
 		navigate("/Auth")
 	}
@@ -22,7 +26,12 @@ export default function SideBar() {
 	return (
 		<>
 		<aside className="fixed inset-y-0 left-0 w-64 h-screen bg-gray-800 text-gray-100 flex flex-col p-4 border-r border-gray-700 overflow-y-auto z-40">
-			<div className="mb-6 text-2xl font-bold">FS PDV</div>
+			<div className="mb-6">
+				<div className="text-2xl font-bold">FS PDV</div>
+				{user && (
+					<div className="mt-1 text-xs text-gray-300">Olá, {user.name || user.email}</div>
+				)}
+			</div>
 
 			<nav className="flex-1">
 				<ul className="space-y-2">
@@ -106,7 +115,8 @@ export default function SideBar() {
 						</button>
 						<button
 							onClick={confirmLogout}
-							className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
+							className="px-4 py-2 rounded-md text-white"
+							style={{ backgroundColor: 'var(--primary-color)' }}
 						>
 							Deslogar
 						</button>

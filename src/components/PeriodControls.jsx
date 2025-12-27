@@ -10,7 +10,8 @@ export default function PeriodControls() {
       <button
         onClick={() => openPeriod()}
         disabled={!!currentOpen}
-        className="px-3 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        className="px-3 py-2 rounded-md text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        style={{ backgroundColor: 'var(--primary-color)' }}
       >
         <Play className="w-4 h-4" /> Abrir período
       </button>
@@ -40,7 +41,7 @@ export default function PeriodControls() {
       </div>
 
       {currentOpen ? (
-        <span className="text-sm text-emerald-600 dark:text-emerald-400">Período aberto desde {formatDateTime(currentOpen.start)}</span>
+        <span className="text-sm" style={{ color: 'var(--primary-color)' }}>Período aberto desde {formatDateTime(currentOpen.start)}</span>
       ) : (
         <span className="text-sm text-gray-500 dark:text-gray-400">Nenhum período em aberto</span>
       )}

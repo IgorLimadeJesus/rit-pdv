@@ -1,8 +1,8 @@
 import SideBar from "../components/SideBar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { loadAccesses, saveAccesses } from "../utils/storage";
 import { useTheme } from "../context/ThemeContext";
-import { Users, UserPlus, Shield, Trash2, X } from "lucide-react";
+import { Users, UserPlus, Shield, Trash2, X, User, Mail, Lock, Sun, Moon } from "lucide-react";
 
 const ROLE_LABELS = {
   admin: "Administrador",
@@ -14,7 +14,12 @@ export default function Settings() {
   const [accesses, setAccesses] = useState(() => loadAccesses());
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: "", username: "", email: "", password: "", role: "operator" });
-  const { primaryColor, setPrimaryColor } = useTheme();
+  const { primaryColor, setPrimaryColor, theme, toggleTheme } = useTheme();
+  const [customColor, setCustomColor] = useState(primaryColor);
+  useEffect(() => {
+    setCustomColor(primaryColor)
+  }, [primaryColor])
+  const isValidHex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 
   const openModal = () => setShowModal(true);
@@ -51,9 +56,19 @@ export default function Settings() {
           <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
             <Shield className="w-5 h-5" /> Configurações · Acessos
           </h1>
-          <button onClick={openModal} className="px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 flex items-center gap-2">
-            <UserPlus className="w-4 h-4" /> Criar acesso
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              title={theme === "dark" ? "Tema escuro" : "Tema claro"}
+            >
+              {theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              <span className="text-sm hidden sm:block">{theme === "dark" ? "Escuro" : "Claro"}</span>
+            </button>
+            <button onClick={openModal} className="px-3 py-2 rounded-md text-white flex items-center gap-2" style={{ backgroundColor: 'var(--primary-color)' }}>
+              <UserPlus className="w-4 h-4" /> Criar acesso
+            </button>
+          </div>
         </div>
 
         <section className="mt-4">
@@ -123,7 +138,36 @@ export default function Settings() {
                 </button>
               ))}
             </div>
-            <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">Cor atual: <span style={{ color: primaryColor }}>{primaryColor}</span></div>
+            <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+              <div>
+                <label className="text-xs text-gray-600 dark:text-gray-400">Código hexadecimal personalizado</label>
+                <div className="mt-1 flex items-center gap-2">
+                  <div
+                    className="shrink-0 rounded-md border border-gray-200 dark:border-gray-700"
+                    style={{ width: 28, height: 28, background: isValidHex.test(customColor) ? customColor : '#ffffff' }}
+                    title="Pré-visualização"
+                  />
+                  <input
+                    value={customColor}
+                    onChange={(e)=>setCustomColor(e.target.value)}
+                    placeholder="#4F39F6"
+                    className="flex-1 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 outline-none"
+                  />
+                </div>
+                {!isValidHex.test(customColor) && (
+                  <div className="mt-1 text-xs text-rose-600">Use um código hex válido (#RGB ou #RRGGBB)</div>
+                )}
+              </div>
+              <button
+                onClick={() => isValidHex.test(customColor) && setPrimaryColor(customColor)}
+                disabled={!isValidHex.test(customColor)}
+                className="px-3 py-2 rounded-md text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: 'var(--primary-color)' }}
+              >
+                Aplicar
+              </button>
+            </div>
+            <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">Cor atual: <span style={{ color: primaryColor }}>{primaryColor}</span></div>
           </div>
         </section>
 
@@ -137,10 +181,22 @@ export default function Settings() {
                 </button>
               </div>
               <div className="mt-3 space-y-3">
-                <input value={form.name} onChange={(e)=>setForm(f=>({...f,name:e.target.value}))} placeholder="Nome" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
-                <input value={form.username} onChange={(e)=>setForm(f=>({...f,username:e.target.value}))} placeholder="Usuário" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
-                <input value={form.email} onChange={(e)=>setForm(f=>({...f,email:e.target.value}))} placeholder="Email" type="email" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
-                <input value={form.password} onChange={(e)=>setForm(f=>({...f,password:e.target.value}))} placeholder="Senha" type="password" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                <div className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <input value={form.name} onChange={(e)=>setForm(f=>({...f,name:e.target.value}))} placeholder="Nome" className="flex-1 bg-transparent outline-none" />
+                </div>
+                <div className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <input value={form.username} onChange={(e)=>setForm(f=>({...f,username:e.target.value}))} placeholder="Usuário" className="flex-1 bg-transparent outline-none" />
+                </div>
+                <div className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-gray-500" />
+                  <input value={form.email} onChange={(e)=>setForm(f=>({...f,email:e.target.value}))} placeholder="Email" type="email" className="flex-1 bg-transparent outline-none" />
+                </div>
+                <div className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-gray-500" />
+                  <input value={form.password} onChange={(e)=>setForm(f=>({...f,password:e.target.value}))} placeholder="Senha" type="password" className="flex-1 bg-transparent outline-none" />
+                </div>
                 <select value={form.role} onChange={(e)=>setForm(f=>({...f,role:e.target.value}))} className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
                   <option value="admin">Administrador</option>
                   <option value="manager">Gerente</option>
@@ -149,7 +205,7 @@ export default function Settings() {
               </div>
               <div className="mt-4 flex justify-end gap-2">
                 <button onClick={closeModal} className="px-3 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100">Cancelar</button>
-                <button onClick={submit} className="px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Salvar</button>
+                <button onClick={submit} className="px-3 py-2 rounded-md text-white" style={{ backgroundColor: 'var(--primary-color)' }}>Salvar</button>
               </div>
             </div>
           </div>

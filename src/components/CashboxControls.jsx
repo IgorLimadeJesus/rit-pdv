@@ -19,7 +19,8 @@ export default function CashboxControls() {
       <button
         onClick={() => openCashbox()}
         disabled={!currentOpen || !!currentCashbox}
-        className="px-3 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        className="px-3 py-2 rounded-md text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        style={{ backgroundColor: 'var(--primary-color)' }}
       >
         <Play className="w-4 h-4" /> Abrir caixa
       </button>
@@ -33,7 +34,7 @@ export default function CashboxControls() {
       </button>
 
       {currentCashbox ? (
-        <span className="text-sm text-emerald-600 dark:text-emerald-400">Aberto desde {formatDateTime(currentCashbox.start)}</span>
+        <span className="text-sm" style={{ color: 'var(--primary-color)' }}>Aberto desde {formatDateTime(currentCashbox.start)}</span>
       ) : (
         <span className="text-sm text-gray-500 dark:text-gray-400">Nenhum caixa em aberto</span>
       )}

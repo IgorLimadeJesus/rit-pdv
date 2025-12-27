@@ -4,6 +4,8 @@ const SALES_KEY = "fs_pdv_sales"
 const PRODUCTS_KEY = "fs_pdv_products"
 const SUPPLIERS_KEY = "fs_pdv_suppliers"
 const ACCESSES_KEY = "fs_pdv_accesses"
+const AUTH_TOKEN_KEY = "fs_pdv_auth_token"
+const AUTH_USER_KEY = "fs_pdv_auth_user"
 
 export function loadPeriods() {
   try {
@@ -79,4 +81,47 @@ export function loadAccesses() {
 
 export function saveAccesses(accesses) {
   localStorage.setItem(ACCESSES_KEY, JSON.stringify(accesses))
+}
+
+// Auth token helpers
+export function loadAuthToken() {
+  try {
+    return localStorage.getItem(AUTH_TOKEN_KEY) || null
+  } catch {
+    return null
+  }
+}
+
+export function saveAuthToken(token) {
+  try {
+    localStorage.setItem(AUTH_TOKEN_KEY, token)
+  } catch {}
+}
+
+export function clearAuthToken() {
+  try {
+    localStorage.removeItem(AUTH_TOKEN_KEY)
+  } catch {}
+}
+
+// Auth user helpers
+export function loadAuthUser() {
+  try {
+    const raw = localStorage.getItem(AUTH_USER_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+export function saveAuthUser(user) {
+  try {
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
+  } catch {}
+}
+
+export function clearAuthUser() {
+  try {
+    localStorage.removeItem(AUTH_USER_KEY)
+  } catch {}
 }

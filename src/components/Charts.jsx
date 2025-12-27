@@ -1,5 +1,6 @@
 import { useMemo, useRef, useEffect, useState } from "react"
 import { usePeriod } from "../context/PeriodContext"
+import { useTheme } from "../context/ThemeContext"
 
 /* =======================
    FATURAMENTO DIÁRIO
@@ -8,6 +9,11 @@ import { usePeriod } from "../context/PeriodContext"
 function RevenuePerDayChart({ daily }) {
   const containerRef = useRef(null)
   const [height, setHeight] = useState(240)
+  const { theme } = useTheme()
+  const isDark = theme === "dark"
+  const gridStroke = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"
+  const axisStroke = isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.2)"
+  const labelFill = isDark ? "#9CA3AF" : "#6B7280" // gray-400 vs gray-500
 
   useEffect(() => {
     const update = () => {
@@ -44,9 +50,9 @@ function RevenuePerDayChart({ daily }) {
   return (
     <div
       ref={containerRef}
-      className="rounded-xl border border-gray-700 bg-gray-900 p-3 h-full"
+      className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 h-full"
     >
-      <h3 className="text-sm font-semibold mb-2 text-white">
+      <h3 className="text-sm font-semibold mb-2 text-gray-800 dark:text-white">
         Faturamento Diário
       </h3>
 
@@ -66,7 +72,7 @@ function RevenuePerDayChart({ daily }) {
               x2={width - PADDING.right}
               y1={y}
               y2={y}
-              stroke="rgba(255,255,255,0.08)"
+              stroke={gridStroke}
               strokeDasharray="4"
             />
           )
@@ -78,7 +84,7 @@ function RevenuePerDayChart({ daily }) {
           x2={PADDING.left}
           y1={PADDING.top}
           y2={height - PADDING.bottom}
-          stroke="rgba(255,255,255,0.25)"
+          stroke={axisStroke}
         />
 
         {/* LINHA */}
@@ -98,7 +104,7 @@ function RevenuePerDayChart({ daily }) {
           return (
             <g key={`${label}-${i}`}>
               <circle cx={p.x} cy={p.y} r={3.5} fill="#22c55e" />
-              <text x={p.x} y={height - 8} textAnchor="middle" className="fill-gray-400 text-[10px]">
+              <text x={p.x} y={height - 8} textAnchor="middle" style={{ fill: labelFill, fontSize: 10 }}>
                 {label}
               </text>
             </g>
@@ -117,6 +123,11 @@ function RevenuePerDayChart({ daily }) {
 function SalesByCategoryChart({ items }) {
   const containerRef = useRef(null)
   const [height, setHeight] = useState(240)
+  const { theme } = useTheme()
+  const isDark = theme === "dark"
+  const gridStroke = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"
+  const axisStroke = isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.2)"
+  const labelFill = isDark ? "#9CA3AF" : "#6B7280"
 
   useEffect(() => {
     const update = () => {
@@ -152,9 +163,9 @@ function SalesByCategoryChart({ items }) {
   return (
     <div
       ref={containerRef}
-      className="rounded-xl border border-gray-700 bg-gray-900 p-3 h-full"
+      className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 h-full"
     >
-      <h3 className="text-sm font-semibold mb-2 text-white">
+      <h3 className="text-sm font-semibold mb-2 text-gray-800 dark:text-white">
         Vendas por Categoria
       </h3>
 
@@ -169,7 +180,7 @@ function SalesByCategoryChart({ items }) {
               x2={width - PADDING.right}
               y1={y}
               y2={y}
-              stroke="rgba(255,255,255,0.08)"
+              stroke={gridStroke}
               strokeDasharray="4"
             />
           )
@@ -181,7 +192,7 @@ function SalesByCategoryChart({ items }) {
           x2={PADDING.left}
           y1={PADDING.top}
           y2={height - PADDING.bottom}
-          stroke="rgba(255,255,255,0.25)"
+          stroke={axisStroke}
         />
 
         {data.entries.map(([label, value], i) => {
@@ -203,7 +214,7 @@ function SalesByCategoryChart({ items }) {
                 x={x + barW / 2}
                 y={height - 10}
                 textAnchor="middle"
-                className="fill-gray-400 text-xs"
+                style={{ fill: labelFill, fontSize: 12 }}
               >
                 {label}
               </text>

@@ -116,9 +116,9 @@ export default function PDV() {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <button onClick={()=>setActiveCat("Todos")} className={`px-3 py-1 rounded-full text-sm ${activeCat==="Todos"?"bg-green-700 text-white":"bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border"}`}>Todos</button>
+              <button onClick={()=>setActiveCat("Todos")} className={`px-3 py-1 rounded-full text-sm ${activeCat==="Todos"?"text-white":"bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border"}`} style={activeCat==="Todos"?{backgroundColor:"var(--primary-color)"}:undefined}>Todos</button>
               {categories.map(cat => (
-                <button key={cat} onClick={()=>setActiveCat(cat)} className={`px-3 py-1 rounded-full text-sm ${activeCat===cat?"bg-green-700 text-white":"bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border"}`}>{cat}</button>
+                <button key={cat} onClick={()=>setActiveCat(cat)} className={`px-3 py-1 rounded-full text-sm ${activeCat===cat?"text-white":"bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border"}`} style={activeCat===cat?{backgroundColor:"var(--primary-color)"}:undefined}>{cat}</button>
               ))}
             </div>
 
@@ -127,7 +127,7 @@ export default function PDV() {
                 .filter(p => (activeCat==="Todos" || p.category===activeCat))
                 .filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
                 .map(p => (
-                <button key={p.id} onClick={()=> currentOpen && currentCashbox && addProductToCart(p)} className="text-left rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 hover:border-green-400 transition">
+                <button key={p.id} onClick={()=> currentOpen && currentCashbox && addProductToCart(p)} className="text-left rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 transition" style={{borderColor:"#e5e7eb"}}>
                   <div className="flex items-center gap-3">
                     {p.image ? (
                       <img src={p.image} alt={p.name} className="w-12 h-12 rounded object-cover" />
@@ -138,7 +138,7 @@ export default function PDV() {
                       <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{p.name}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{p.category || "—"}</p>
                     </div>
-                    <div className="text-green-600 dark:text-green-400 font-semibold">
+                    <div className="font-semibold" style={{color:"var(--primary-color)"}}>
                       {formatCurrencyBRL(p.price)}
                     </div>
                   </div>
@@ -194,13 +194,14 @@ export default function PDV() {
                 <button
                   onClick={handleClickFinalize}
                   disabled={!currentOpen || !currentCashbox || items.length === 0}
-                  className="w-full px-4 py-3 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full px-4 py-3 rounded-lg text-white disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+                  style={{backgroundColor:"var(--primary-color)"}}
                 >
                   <CheckCircle2 className="w-5 h-5" /> Finalizar venda
                 </button>
               </div>
               {message && (
-                <div className="mt-3 text-sm text-emerald-600 dark:text-emerald-400 text-center">{message}</div>
+                <div className="mt-3 text-sm text-center" style={{color:"var(--primary-color)"}}>{message}</div>
               )}
             </div>
           </div>

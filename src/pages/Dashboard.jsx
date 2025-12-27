@@ -26,14 +26,14 @@ export default function Dashboard() {
         {/* Faturamento Total */}
         <div className="group rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md hover:border-indigo-300 transition-shadow">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-md bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+            <div className="p-2 rounded-md" style={{ color: 'var(--primary-color)' }}>
               <DollarSign className="w-5 h-5" />
             </div>
             <div className="flex-1">
               <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Faturamento Total</p>
               <p className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">{formatCurrencyBRL(metrics.total)}</p>
               <div className="mt-2 flex items-center gap-2">
-                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+                <span className="flex items-center gap-1 text-sm font-medium" style={{ color: 'var(--primary-color)' }}>
                   <TrendingUp className="w-4 h-4" />
                   +12%
                 </span>
@@ -46,14 +46,14 @@ export default function Dashboard() {
         {/* Total de Vendas */}
         <div className="group rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md hover:border-emerald-300 transition-shadow">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-md bg-emerald-600/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+            <div className="p-2 rounded-md" style={{ color: 'var(--primary-color)' }}>
               <ShoppingBag className="w-5 h-5" />
             </div>
             <div className="flex-1">
               <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Total de Vendas</p>
               <p className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">{metrics.count}</p>
               <div className="mt-2 flex items-center gap-2">
-                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+                <span className="flex items-center gap-1 text-sm font-medium" style={{ color: 'var(--primary-color)' }}>
                   <TrendingUp className="w-4 h-4" />
                   +8%
                 </span>
@@ -73,7 +73,7 @@ export default function Dashboard() {
               <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Ticket Médio</p>
               <p className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">{formatCurrencyBRL(metrics.avg)}</p>
               <div className="mt-2 flex items-center gap-2">
-                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+                <span className="flex items-center gap-1 text-sm font-medium" style={{ color: 'var(--primary-color)' }}>
                   <TrendingUp className="w-4 h-4" />
                   +2%
                 </span>
