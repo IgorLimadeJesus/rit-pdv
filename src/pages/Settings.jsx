@@ -11,7 +11,7 @@ const ROLE_LABELS = {
 };
 
 export default function Settings() {
-  const [accesses, setAccesses] = useState(() => loadAccesses());
+  const [accesses, setAccesses] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: "", username: "", email: "", password: "", role: "operator" });
   const { primaryColor, setPrimaryColor, theme, toggleTheme } = useTheme();
@@ -25,27 +25,41 @@ export default function Settings() {
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
 
-  const submit = () => {
-    if (!form.name || !form.username || !form.email || !form.password) return;
-    const newItem = {
-      id: Date.now(),
-      name: form.name.trim(),
-      username: form.username.trim(),
-      email: form.email.trim(),
-      password: form.password,
-      role: form.role,
-    };
-    const next = [newItem, ...accesses];
-    setAccesses(next);
-    saveAccesses(next);
-    setForm({ name: "", username: "", email: "", password: "", role: "operator" });
-    setShowModal(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = async () => {
+    setError("");
+    if (!form.name || !form.email || !form.password) {
+      setError("Preencha nome, email e senha.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("http://212.85.21.207:5000/api/Auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ nome: form.name, email: form.email, senha: form.password })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.message || "Falha ao cadastrar acesso");
+      }
+      // Opcional: adicionar ao array local para exibir na tabela
+      setAccesses(prev => [{ name: form.name, email: form.email, role: form.role }, ...prev]);
+      setForm({ name: "", username: "", email: "", password: "", role: "operator" });
+      setShowModal(false);
+    } catch (err) {
+      setError(err.message || "Erro inesperado");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Remover função de deletar do Local Storage
   const remove = (id) => {
-    const next = accesses.filter((a) => a.id !== id);
-    setAccesses(next);
-    saveAccesses(next);
+    setAccesses(prev => prev.filter((a, idx) => idx !== id));
+    // Para deletar no backend, seria necessário um endpoint específico
   };
 
   return (
@@ -91,10 +105,10 @@ export default function Settings() {
                     </td>
                   </tr>
                 ) : (
-                  accesses.map((a) => (
-                    <tr key={a.id} className="border-t border-gray-100 dark:border-gray-700">
+                  accesses.map((a, idx) => (
+                    <tr key={idx} className="border-t border-gray-100 dark:border-gray-700">
                       <td className="px-4 py-2 text-gray-800 dark:text-gray-100">{a.name}</td>
-                      <td className="px-4 py-2 text-gray-600 dark:text-gray-300">{a.username}</td>
+                      <td className="px-4 py-2 text-gray-600 dark:text-gray-300">—</td>
                       <td className="px-4 py-2 text-gray-600 dark:text-gray-300">{a.email}</td>
                       <td className="px-4 py-2">
                         <span className={`px-2 py-1 rounded-md text-xs font-medium ${
@@ -108,7 +122,7 @@ export default function Settings() {
                         </span>
                       </td>
                       <td className="px-4 py-2 text-right">
-                        <button onClick={() => remove(a.id)} className="px-2 py-1 rounded-md hover:bg-gray-700 text-gray-300">
+                        <button onClick={() => remove(idx)} className="px-2 py-1 rounded-md hover:bg-gray-700 text-gray-300">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
@@ -185,10 +199,7 @@ export default function Settings() {
                   <User className="w-4 h-4 text-gray-500" />
                   <input value={form.name} onChange={(e)=>setForm(f=>({...f,name:e.target.value}))} placeholder="Nome" className="flex-1 bg-transparent outline-none" />
                 </div>
-                <div className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                  <User className="w-4 h-4 text-gray-500" />
-                  <input value={form.username} onChange={(e)=>setForm(f=>({...f,username:e.target.value}))} placeholder="Usuário" className="flex-1 bg-transparent outline-none" />
-                </div>
+                {/* Usuário removido pois não é enviado para o backend */}
                 <div className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex items-center gap-2">
                   <Mail className="w-4 h-4 text-gray-500" />
                   <input value={form.email} onChange={(e)=>setForm(f=>({...f,email:e.target.value}))} placeholder="Email" type="email" className="flex-1 bg-transparent outline-none" />
@@ -202,10 +213,11 @@ export default function Settings() {
                   <option value="manager">Gerente</option>
                   <option value="operator">Operador</option>
                 </select>
+                {error && <div className="text-sm text-rose-500">{error}</div>}
               </div>
               <div className="mt-4 flex justify-end gap-2">
                 <button onClick={closeModal} className="px-3 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100">Cancelar</button>
-                <button onClick={submit} className="px-3 py-2 rounded-md text-white" style={{ backgroundColor: 'var(--primary-color)' }}>Salvar</button>
+                <button onClick={submit} className="px-3 py-2 rounded-md text-white" style={{ backgroundColor: 'var(--primary-color)' }} disabled={loading}>{loading ? "Salvando..." : "Salvar"}</button>
               </div>
             </div>
           </div>

@@ -1,39 +1,78 @@
 import SideBar from "../components/SideBar"
-import { useState } from "react"
-import { useInventory } from "../context/InventoryContext"
+import { useState, useEffect } from "react"
 import { formatCurrencyBRL } from "../utils/storage"
 import { Plus, Package, Truck, Trash2, X, User, Phone } from "lucide-react"
 
 export default function Products() {
-  const { products, suppliers, addProduct, removeProduct, addSupplier, removeSupplier } = useInventory()
+  const [products, setProducts] = useState([]);
   const [tab, setTab] = useState("produtos")
   const [showProdModal, setShowProdModal] = useState(false)
-  const [showSupModal, setShowSupModal] = useState(false)
-  const [prodForm, setProdForm] = useState({ name: "", category: "", price: "", image: "" })
-  const [supForm, setSupForm] = useState({ name: "", contact: "" })
+  const [prodForm, setProdForm] = useState({ nome: "", descricao: "", categoria: "", codigo_barras: "", preco_custo: "", preco_venda: "", estoque_atual: "", estoque_minimo: "" })
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  // Fornecedores mantidos localmente
+  const [suppliers, setSuppliers] = useState([]);
+  const [showSupModal, setShowSupModal] = useState(false);
+  const [supForm, setSupForm] = useState({ name: "", contact: "" });
 
-  const formatPhoneBR = (value) => {
-    const digits = (value || "").replace(/\D/g, "").slice(0, 11)
-    if (digits.length <= 2) return digits ? `(${digits}` : ""
-    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}`
-    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6, 10)}`
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`
-  }
+  // Buscar produtos da API
+  useEffect(() => {
+    async function fetchProducts() {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch("http://212.85.21.207:5000/api/Product");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || "Erro ao buscar produtos");
+        setProducts(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err.message || "Erro inesperado");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProducts();
+  }, []);
 
-  const submitProduct = () => {
-    const price = Number(prodForm.price)
-    if (!prodForm.name || isNaN(price) || price <= 0) return
-    addProduct({ name: prodForm.name, category: prodForm.category, price, image: prodForm.image })
-    setProdForm({ name: "", category: "", price: "" })
-    setShowProdModal(false)
-  }
-
-  const submitSupplier = () => {
-    if (!supForm.name) return
-    addSupplier({ name: supForm.name, contact: supForm.contact })
-    setSupForm({ name: "", contact: "" })
-    setShowSupModal(false)
-  }
+  // Cadastrar produto na API
+  const submitProduct = async () => {
+    setError("");
+    // Validação: todos os campos obrigatórios
+    const payload = {
+      nome: prodForm.nome?.trim() || "",
+      descricao: prodForm.descricao?.trim() || "",
+      categoria: prodForm.categoria?.trim() || "",
+      codigo_barras: prodForm.codigo_barras?.trim() || "",
+      preco_custo: Number(prodForm.preco_custo) || 0,
+      preco_venda: Number(prodForm.preco_venda) || 0,
+      estoque_atual: Number(prodForm.estoque_atual) || 0,
+      estoque_minimo: Number(prodForm.estoque_minimo) || 0
+    };
+    if (!payload.nome || !payload.preco_venda || !payload.categoria || !payload.codigo_barras) {
+      setError("Preencha todos os campos obrigatórios: nome, categoria, código de barras e preço de venda.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("http://212.85.21.207:5000/api/Product/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message || "Erro ao cadastrar produto");
+      setShowProdModal(false);
+      setProdForm({ nome: "", descricao: "", categoria: "", codigo_barras: "", preco_custo: "", preco_venda: "", estoque_atual: "", estoque_minimo: "" });
+      // Atualizar lista
+      const resList = await fetch("http://212.85.21.207:5000/api/Product");
+      const listData = await resList.json();
+      setProducts(Array.isArray(listData) ? listData : []);
+    } catch (err) {
+      setError(err.message || "Erro inesperado");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex">
@@ -55,40 +94,35 @@ export default function Products() {
               </button>
             </div>
 
+            {error && <div className="text-sm text-rose-500 mt-2">{error}</div>}
+            {loading && <div className="text-sm text-gray-500 mt-2">Carregando...</div>}
+
             <div className="mt-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-600 dark:text-gray-300">
                   <tr>
-                    <th className="text-left px-4 py-2">Imagem</th>
                     <th className="text-left px-4 py-2">Nome</th>
+                    <th className="text-left px-4 py-2">Descrição</th>
                     <th className="text-left px-4 py-2">Categoria</th>
-                    <th className="text-left px-4 py-2">Preço</th>
-                    <th className="px-4 py-2 text-right">Ações</th>
+                    <th className="text-left px-4 py-2">Código Barras</th>
+                    <th className="text-left px-4 py-2">Preço Venda</th>
+                    <th className="text-left px-4 py-2">Estoque Atual</th>
                   </tr>
                 </thead>
                 <tbody>
                   {products.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-6 text-center text-gray-500 dark:text-gray-400">Nenhum produto cadastrado.</td>
+                      <td colSpan={6} className="px-4 py-6 text-center text-gray-500 dark:text-gray-400">Nenhum produto cadastrado.</td>
                     </tr>
                   ) : (
                     products.map(p => (
                       <tr key={p.id} className="border-t border-gray-100 dark:border-gray-700">
-                        <td className="px-4 py-2">
-                          {p.image ? (
-                            <img src={p.image} alt={p.name} className="w-10 h-10 rounded object-cover" />
-                          ) : (
-                            <div className="w-10 h-10 rounded bg-gray-200 dark:bg-gray-700" />
-                          )}
-                        </td>
-                        <td className="px-4 py-2 text-gray-800 dark:text-gray-100">{p.name}</td>
-                        <td className="px-4 py-2 text-gray-600 dark:text-gray-300">{p.category || "—"}</td>
-                        <td className="px-4 py-2 text-gray-800 dark:text-gray-100">{formatCurrencyBRL(p.price)}</td>
-                        <td className="px-4 py-2 text-right">
-                          <button onClick={() => removeProduct(p.id)} className="px-2 py-1 rounded-md hover:bg-gray-700 text-gray-300">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
+                        <td className="px-4 py-2 text-gray-800 dark:text-gray-100">{p.nome}</td>
+                        <td className="px-4 py-2 text-gray-600 dark:text-gray-300">{p.descricao}</td>
+                        <td className="px-4 py-2 text-gray-600 dark:text-gray-300">{p.categoria}</td>
+                        <td className="px-4 py-2 text-gray-600 dark:text-gray-300">{p.codigo_barras}</td>
+                        <td className="px-4 py-2 text-gray-800 dark:text-gray-100">{formatCurrencyBRL(p.preco_venda)}</td>
+                        <td className="px-4 py-2 text-gray-800 dark:text-gray-100">{p.estoque_atual}</td>
                       </tr>
                     ))
                   )}
@@ -104,31 +138,25 @@ export default function Products() {
                 <Plus className="w-4 h-4" /> Adicionar fornecedor
               </button>
             </div>
-
+            {/* Fornecedores mantidos localmente */}
             <div className="mt-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-600 dark:text-gray-300">
                   <tr>
                     <th className="text-left px-4 py-2">Nome</th>
                     <th className="text-left px-4 py-2">Contato</th>
-                    <th className="px-4 py-2 text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {suppliers.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="px-4 py-6 text-center text-gray-500 dark:text-gray-400">Nenhum fornecedor cadastrado.</td>
+                      <td colSpan={2} className="px-4 py-6 text-center text-gray-500 dark:text-gray-400">Nenhum fornecedor cadastrado.</td>
                     </tr>
                   ) : (
-                    suppliers.map(s => (
-                      <tr key={s.id} className="border-t border-gray-100 dark:border-gray-700">
+                    suppliers.map((s, idx) => (
+                      <tr key={idx} className="border-t border-gray-100 dark:border-gray-700">
                         <td className="px-4 py-2 text-gray-800 dark:text-gray-100">{s.name}</td>
                         <td className="px-4 py-2 text-gray-600 dark:text-gray-300">{s.contact || "—"}</td>
-                        <td className="px-4 py-2 text-right">
-                          <button onClick={() => removeSupplier(s.id)} className="px-2 py-1 rounded-md hover:bg-gray-700 text-gray-300">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
                       </tr>
                     ))
                   )}
@@ -146,14 +174,19 @@ export default function Products() {
                 <button onClick={() => setShowProdModal(false)} className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"><X className="w-4 h-4" /></button>
               </div>
               <div className="mt-3 space-y-3">
-                <input value={prodForm.name} onChange={e=>setProdForm(f=>({...f,name:e.target.value}))} placeholder="Nome" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
-                <input value={prodForm.category} onChange={e=>setProdForm(f=>({...f,category:e.target.value}))} placeholder="Categoria" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
-                <input value={prodForm.price} onChange={e=>setProdForm(f=>({...f,price:e.target.value}))} placeholder="Preço" type="number" step="0.01" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
-                <input value={prodForm.image} onChange={e=>setProdForm(f=>({...f,image:e.target.value}))} placeholder="URL da imagem (opcional)" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                <input value={prodForm.nome} onChange={e=>setProdForm(f=>({...f,nome:e.target.value}))} placeholder="Nome" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                <input value={prodForm.descricao} onChange={e=>setProdForm(f=>({...f,descricao:e.target.value}))} placeholder="Descrição" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                <input value={prodForm.categoria} onChange={e=>setProdForm(f=>({...f,categoria:e.target.value}))} placeholder="Categoria" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                <input value={prodForm.codigo_barras} onChange={e=>setProdForm(f=>({...f,codigo_barras:e.target.value}))} placeholder="Código de Barras" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                <input value={prodForm.preco_custo} onChange={e=>setProdForm(f=>({...f,preco_custo:e.target.value}))} placeholder="Preço de Custo" type="number" step="0.01" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                <input value={prodForm.preco_venda} onChange={e=>setProdForm(f=>({...f,preco_venda:e.target.value}))} placeholder="Preço de Venda" type="number" step="0.01" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                <input value={prodForm.estoque_atual} onChange={e=>setProdForm(f=>({...f,estoque_atual:e.target.value}))} placeholder="Estoque Atual" type="number" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                <input value={prodForm.estoque_minimo} onChange={e=>setProdForm(f=>({...f,estoque_minimo:e.target.value}))} placeholder="Estoque Mínimo" type="number" className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" />
+                {error && <div className="text-sm text-rose-500">{error}</div>}
               </div>
               <div className="mt-4 flex justify-end gap-2">
                 <button onClick={()=>setShowProdModal(false)} className="px-3 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100">Cancelar</button>
-                <button onClick={submitProduct} className="px-3 py-2 rounded-md text-white" style={{ backgroundColor: "var(--primary-color)" }}>Salvar</button>
+                <button onClick={submitProduct} className="px-3 py-2 rounded-md text-white" style={{ backgroundColor: "var(--primary-color)" }} disabled={loading}>{loading ? "Salvando..." : "Salvar"}</button>
               </div>
             </div>
           </div>
@@ -173,12 +206,16 @@ export default function Products() {
                 </div>
                 <div className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex items-center gap-2">
                   <Phone className="w-4 h-4 text-gray-500" />
-                  <input value={supForm.contact} onChange={e=>setSupForm(f=>({...f,contact: formatPhoneBR(e.target.value)}))} placeholder="Telefone" type="tel" className="flex-1 bg-transparent outline-none" />
+                  <input value={supForm.contact} onChange={e=>setSupForm(f=>({...f,contact: e.target.value}))} placeholder="Telefone" type="tel" className="flex-1 bg-transparent outline-none" />
                 </div>
               </div>
               <div className="mt-4 flex justify-end gap-2">
                 <button onClick={()=>setShowSupModal(false)} className="px-3 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100">Cancelar</button>
-                <button onClick={submitSupplier} className="px-3 py-2 rounded-md text-white" style={{ backgroundColor: "var(--primary-color)" }}>Salvar</button>
+                <button onClick={()=>{
+                  setSuppliers(f=>[supForm,...f]);
+                  setSupForm({ name: "", contact: "" });
+                  setShowSupModal(false);
+                }} className="px-3 py-2 rounded-md text-white" style={{ backgroundColor: "var(--primary-color)" }}>Salvar</button>
               </div>
             </div>
           </div>

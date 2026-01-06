@@ -4,7 +4,7 @@ import { useInventory } from "../context/InventoryContext"
 import { formatCurrencyBRL } from "../utils/storage"
 import { PlusCircle, Trash2, CheckCircle2, Minus, Plus, Search, Tag } from "lucide-react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import FinalizeSaleModal from "../components/FinalizeSaleModal"
 import ConfirmModal from "../components/ConfirmModal"
 import LoadingModal from "../components/LoadingModal"
@@ -12,12 +12,34 @@ import PixModal from "../components/PixModal"
 
 export default function PDV() {
   const { addSale, currentOpen, currentCashbox } = usePeriod()
-  const { products } = useInventory()
+  const [products, setProducts] = useState([])
   const [items, setItems] = useState([])
   const [message, setMessage] = useState("")
   const [query, setQuery] = useState("")
-  const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)))
   const [activeCat, setActiveCat] = useState("Todos")
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Buscar produtos da API
+  useEffect(() => {
+    async function fetchProducts() {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch("http://212.85.21.207:5000/api/Product");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || "Erro ao buscar produtos");
+        setProducts(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err.message || "Erro inesperado");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProducts();
+  }, []);
+
+  const categories = Array.from(new Set(products.map(p => p.categoria).filter(Boolean)));
 
   // Modals state
   const [showFinalize, setShowFinalize] = useState(false)
@@ -30,13 +52,19 @@ export default function PDV() {
 
   const addProductToCart = (p) => {
     setItems(prev => {
-      const idx = prev.findIndex(it => it.name === p.name && it.price === p.price)
+      const idx = prev.findIndex(it => it.id === p.id)
       if (idx >= 0) {
         const copy = [...prev]
         copy[idx] = { ...copy[idx], qty: Number(copy[idx].qty) + 1 }
         return copy
       }
-      return [...prev, { name: p.name, category: p.category, price: p.price, qty: 1, image: p.image }]
+      return [...prev, {
+        id: p.id,
+        name: p.nome,
+        category: p.categoria,
+        price: p.preco_venda,
+        qty: 1
+      }]
     })
   }
 
@@ -115,6 +143,9 @@ export default function PDV() {
               </div>
             </div>
 
+            {error && <div className="text-sm text-rose-500 mt-2">{error}</div>}
+            {loading && <div className="text-sm text-gray-500 mt-2">Carregando...</div>}
+
             <div className="mt-4 flex flex-wrap gap-2">
               <button onClick={()=>setActiveCat("Todos")} className={`px-3 py-1 rounded-full text-sm ${activeCat==="Todos"?"text-white":"bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border"}`} style={activeCat==="Todos"?{backgroundColor:"var(--primary-color)"}:undefined}>Todos</button>
               {categories.map(cat => (
@@ -124,22 +155,19 @@ export default function PDV() {
 
             <div className="mt-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {products
-                .filter(p => (activeCat==="Todos" || p.category===activeCat))
-                .filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
+                .filter(p => (activeCat==="Todos" || p.categoria===activeCat))
+                .filter(p => p.nome.toLowerCase().includes(query.toLowerCase()))
                 .map(p => (
                 <button key={p.id} onClick={()=> currentOpen && currentCashbox && addProductToCart(p)} className="text-left rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 transition" style={{borderColor:"#e5e7eb"}}>
                   <div className="flex items-center gap-3">
-                    {p.image ? (
-                      <img src={p.image} alt={p.name} className="w-12 h-12 rounded object-cover" />
-                    ) : (
-                      <div className="w-12 h-12 rounded bg-gray-200 dark:bg-gray-700" />
-                    )}
+                    {/* Imagem não disponível no endpoint, exibe placeholder */}
+                    <div className="w-12 h-12 rounded bg-gray-200 dark:bg-gray-700" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{p.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{p.category || "—"}</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{p.nome}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{p.categoria || "—"}</p>
                     </div>
                     <div className="font-semibold" style={{color:"var(--primary-color)"}}>
-                      {formatCurrencyBRL(p.price)}
+                      {formatCurrencyBRL(p.preco_venda)}
                     </div>
                   </div>
                 </button>

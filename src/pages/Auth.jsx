@@ -19,7 +19,7 @@ export default function Home() {
     }
     setLoading(true);
     try {
-      const res = await fetch("https://localhost:7235/api/Auth/login", {
+      const res = await fetch("http://212.85.21.207:5000/api/Auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         // API espera campo `senha` (pt-BR); enviamos ambos por segurança
