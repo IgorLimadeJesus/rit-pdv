@@ -19,7 +19,7 @@ export default function Home() {
     }
     setLoading(true);
     try {
-      const res = await fetch("https://api.rittech.shop/api/Auth/login", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/Auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         // API espera campo `senha` (pt-BR); enviamos ambos por segurança

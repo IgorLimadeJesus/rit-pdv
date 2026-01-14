@@ -21,7 +21,7 @@ export default function Products() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch("https://api.rittech.shop/api/Product");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/Product`);
         const data = await res.json();
         if (!res.ok) throw new Error(data?.message || "Erro ao buscar produtos");
         setProducts(Array.isArray(data) ? data : []);
@@ -54,7 +54,7 @@ export default function Products() {
     }
     setLoading(true);
     try {
-      const res = await fetch("https://api.rittech.shop/api/Product/register", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/Product/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify(payload)
@@ -64,7 +64,7 @@ export default function Products() {
       setShowProdModal(false);
       setProdForm({ nome: "", descricao: "", categoria: "", codigo_barras: "", preco_custo: "", preco_venda: "", estoque_atual: "", estoque_minimo: "" });
       // Atualizar lista
-      const resList = await fetch("https://api.rittech.shop/api/Product");
+      const resList = await fetch(`${import.meta.env.VITE_API_URL}/api/Product`);
       const listData = await resList.json();
       setProducts(Array.isArray(listData) ? listData : []);
     } catch (err) {

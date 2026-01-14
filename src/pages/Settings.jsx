@@ -36,7 +36,7 @@ export default function Settings() {
     }
     setLoading(true);
     try {
-      const res = await fetch("https://api.rittech.shop/api/Auth/register", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/Auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify({ nome: form.name, email: form.email, senha: form.password })
