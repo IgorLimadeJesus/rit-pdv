@@ -26,7 +26,7 @@ export default function PDV() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch("http://212.85.21.207:5000/api/Product");
+        const res = await fetch("https://api.rittech.shop/api/Product");
         const data = await res.json();
         if (!res.ok) throw new Error(data?.message || "Erro ao buscar produtos");
         setProducts(Array.isArray(data) ? data : []);
